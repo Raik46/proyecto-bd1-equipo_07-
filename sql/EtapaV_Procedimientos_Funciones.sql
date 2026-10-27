@@ -1,6 +1,9 @@
 USE techgamer;
 GO
 
+-- ============================================================================
+-- 1. FUNCIÓN ALMACENADA: fn_CalcularDescuentoCliente
+-- ============================================================================
 IF OBJECT_ID('dbo.fn_CalcularDescuentoCliente', 'FN') IS NOT NULL
     DROP FUNCTION dbo.fn_CalcularDescuentoCliente;
 GO
@@ -16,20 +19,22 @@ BEGIN
     DECLARE @porcentaje_descuento DECIMAL(5,2) = 0.00;
 
     SELECT @total_acumulado = ISNULL(SUM(total), 0.00)
-    FROM VENTA
+    FROM dbo.VENTA
     WHERE id_cliente = @id_cliente;
-
     IF @total_acumulado > 500000.00
-        SET @porcentaje_descuento = 0.10;
+        SET @porcentaje_descuento = 0.10; -- 10%
     ELSE IF @total_acumulado > 200000.00
-        SET @porcentaje_descuento = 0.05;
+        SET @porcentaje_descuento = 0.05; -- 5%
     ELSE
-        SET @porcentaje_descuento = 0.00;
+        SET @porcentaje_descuento = 0.00; -- 0%
 
     RETURN @porcentaje_descuento;
 END;
 GO
 
+-- ============================================================================
+-- 2. PROCEDIMIENTO ALMACENADO: sp_RegistrarVentaCompleta
+-- ============================================================================
 IF OBJECT_ID('dbo.sp_RegistrarVentaCompleta', 'P') IS NOT NULL
     DROP PROCEDURE dbo.sp_RegistrarVentaCompleta;
 GO
@@ -46,63 +51,56 @@ BEGIN
 
     DECLARE @precio_unitario DECIMAL(10,2);
     DECLARE @stock_actual INT;
-    DECLARE @total_calculado DECIMAL(12,2);
     DECLARE @descuento DECIMAL(5,2);
+    DECLARE @total_calculado DECIMAL(12,2);
     DECLARE @nuevo_id_venta INT;
 
+    -- ------------------------------------------------------------------------
+    -- VALIDACIONES DE NEGOCIO
+    -- ------------------------------------------------------------------------
+    IF @cantidad <= 0
+    BEGIN
+        RAISERROR('Error: La cantidad vendida debe ser mayor a 0.', 16, 1);
+        RETURN;
+    END
     SELECT @precio_unitario = precio, @stock_actual = stock
-    FROM PRODUCTO
+    FROM dbo.PRODUCTO
     WHERE id_producto = @id_producto;
-
+    
     IF @precio_unitario IS NULL
     BEGIN
-        PRINT 'Error: El producto especificado no existe.';
+        RAISERROR('Error: El producto especificado no existe.', 16, 1);
         RETURN;
     END
 
-    IF @stock_actual < @cantidad
+        IF @stock_actual < @cantidad
     BEGIN
-        PRINT 'Error: Stock insuficiente para realizar la venta.';
+        RAISERROR('Error: Stock insuficiente para realizar la venta.', 16, 1);
         RETURN;
     END
 
+    -- ------------------------------------------------------------------------
+    -- OPERACIÓN MULTITABLA (TRANSACCIÓN INTEGRAL)
+    -- ------------------------------------------------------------------------
+    BEGIN TRANSACTION;
     SET @descuento = dbo.fn_CalcularDescuentoCliente(@id_cliente);
-
     SET @total_calculado = (@precio_unitario * @cantidad) * (1.00 - @descuento);
 
-    INSERT INTO VENTA (fecha, total, id_cliente, id_empleado, id_forma_pago)
+
+    INSERT INTO dbo.VENTA (fecha, total, id_cliente, id_empleado, id_forma_pago)
     VALUES (GETDATE(), @total_calculado, @id_cliente, @id_empleado, @id_forma_pago);
 
     SET @nuevo_id_venta = SCOPE_IDENTITY();
 
-    INSERT INTO DETALLE_VENTA (cantidad, precio_unitario, id_venta, id_producto)
+    INSERT INTO dbo.DETALLE_VENTA (cantidad, precio_unitario, id_venta, id_producto)
     VALUES (@cantidad, @precio_unitario, @nuevo_id_venta, @id_producto);
 
-    UPDATE PRODUCTO
+    UPDATE dbo.PRODUCTO
     SET stock = stock - @cantidad
     WHERE id_producto = @id_producto;
 
-    PRINT 'Venta registrada con exito. ID Venta: ' + CAST(@nuevo_id_venta AS VARCHAR);
+    COMMIT TRANSACTION;
+
+    PRINT 'Venta registrada con éxito. ID Venta: ' + CAST(@nuevo_id_venta AS VARCHAR(10));
 END;
-GO
-
-SELECT
-    id_cliente,
-    nombre + ' ' + apellido AS cliente,
-    dbo.fn_CalcularDescuentoCliente(id_cliente) AS porcentaje_descuento
-FROM CLIENTE;
-GO
-
-SELECT id_producto, nombre, stock FROM PRODUCTO WHERE id_producto = 1;
-
-EXEC dbo.sp_RegistrarVentaCompleta
-    @id_cliente = 1,
-    @id_empleado = 1,
-    @id_forma_pago = 1,
-    @id_producto = 1,
-    @cantidad = 2;
-
-SELECT TOP 1 * FROM VENTA ORDER BY id_venta DESC;
-SELECT TOP 1 * FROM DETALLE_VENTA ORDER BY id_detalle DESC;
-SELECT id_producto, nombre, stock FROM PRODUCTO WHERE id_producto = 1;
 GO
