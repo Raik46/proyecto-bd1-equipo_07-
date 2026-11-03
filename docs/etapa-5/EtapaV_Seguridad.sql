@@ -5,7 +5,7 @@
 -- Ejecutar DESPUÉS de DDL, DML, EtapaV_Procedimientos_Funciones.sql y
 -- EtapaV_Triggers_Auditoria.sql.
 
--- 1. LOGINS (nivel servidor): quién puede conectarse al motor
+-- 1. LOGINS (nivel servidor)
 USE master;
 GO
 
