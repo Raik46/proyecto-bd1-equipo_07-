@@ -2,8 +2,8 @@ USE techgamer;
 GO
 
 -- DEMOSTRACION ALTERNATIVA DE LOS TRIGGERS DE AUDITORIA
--- Ejecutar despues de EtapaV_Triggers_Auditoria_Alternativa.sql.
--- Se buscan identificadores existentes para no depender de IDs fijos.
+-- Ejecutar despues de EtapaV_Triggers_Auditoria_Alternativa.sql
+-- Se buscan identificadores existentes para no depender de IDs fijos
 
 -- 1. Registrar una venta mediante el procedimiento almacenado.
 -- Esto puede generar INSERT en VENTA, INSERT en DETALLE_VENTA
