@@ -1,0 +1,199 @@
+USE master;
+GO
+
+IF DB_ID('techgamer') IS NOT NULL
+BEGIN
+  ALTER DATABASE techgamer SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+  DROP DATABASE techgamer;
+END
+GO
+
+CREATE DATABASE techgamer;
+GO
+
+USE techgamer;
+GO
+
+CREATE TABLE CATEGORIA (
+  id_categoria INT NOT NULL IDENTITY (1,1),
+  nombre VARCHAR(50) NOT NULL,
+  descripcion VARCHAR(150) NOT NULL
+);
+ALTER TABLE CATEGORIA ADD CONSTRAINT PK_CATEGORIA PRIMARY KEY (id_categoria), CONSTRAINT UQ_CATEGORIA_NOMBRE UNIQUE (nombre);
+
+CREATE TABLE PROVEEDOR (
+  id_proveedor INT NOT NULL IDENTITY (1,1),
+  cuil VARCHAR(13) NOT NULL,
+  razon_social VARCHAR(100) NOT NULL,
+  telefono VARCHAR(20) NOT NULL,
+  email VARCHAR(100) NOT NULL
+);
+ALTER TABLE PROVEEDOR ADD CONSTRAINT PK_PROVEEDOR PRIMARY KEY (id_proveedor), CONSTRAINT UQ_PROVEEDOR_CUIL UNIQUE (cuil), CONSTRAINT CK_PROVEEDOR_CUIL CHECK (cuil LIKE '[0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9]'), CONSTRAINT CK_PROVEEDOR_EMAIL CHECK (email LIKE '%_@_%.__%');
+
+CREATE TABLE PRODUCTO (
+  id_producto INT NOT NULL IDENTITY (1,1),
+  nombre VARCHAR(100) NOT NULL,
+  precio DECIMAL(10,2) NOT NULL,
+  stock INT NOT NULL,
+  id_categoria INT NOT NULL,
+  id_proveedor INT NOT NULL
+);
+ALTER TABLE PRODUCTO ADD CONSTRAINT PK_PRODUCTO PRIMARY KEY (id_producto), CONSTRAINT DF_PRODUCTO_STOCK DEFAULT 0 FOR stock, CONSTRAINT CK_PRODUCTO_PRECIO CHECK (precio > 0), CONSTRAINT CK_PRODUCTO_STOCK CHECK (stock >= 0), CONSTRAINT FK_PRODUCTO_CATEGORIA FOREIGN KEY (id_categoria) REFERENCES CATEGORIA(id_categoria) ON DELETE NO ACTION ON UPDATE CASCADE, CONSTRAINT FK_PRODUCTO_PROVEEDOR FOREIGN KEY (id_proveedor) REFERENCES PROVEEDOR(id_proveedor) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+CREATE TABLE CLIENTE (
+  id_cliente INT NOT NULL IDENTITY (1,1),
+  nombre VARCHAR(50) NOT NULL,
+  apellido VARCHAR(50) NOT NULL,
+  dni VARCHAR(8) NOT NULL,
+  email VARCHAR(100) NOT NULL,
+  telefono VARCHAR(20) NOT NULL
+);
+ALTER TABLE CLIENTE ADD CONSTRAINT PK_CLIENTE PRIMARY KEY (id_cliente), CONSTRAINT UQ_CLIENTE_DNI UNIQUE (dni), CONSTRAINT CK_CLIENTE_DNI CHECK (dni LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'), CONSTRAINT CK_CLIENTE_EMAIL CHECK (email LIKE '%_@_%.__%');
+
+CREATE TABLE EMPLEADO (
+  id_empleado INT NOT NULL IDENTITY (1,1),
+  nombre VARCHAR(50) NOT NULL,
+  apellido VARCHAR(50) NOT NULL,
+  legajo VARCHAR(10) NOT NULL,
+  telefono VARCHAR(20) NOT NULL
+);
+ALTER TABLE EMPLEADO ADD CONSTRAINT PK_EMPLEADO PRIMARY KEY (id_empleado), CONSTRAINT UQ_EMPLEADO_LEGAJO UNIQUE (legajo);
+
+CREATE TABLE FORMA_PAGO (
+  id_forma_pago INT NOT NULL IDENTITY (1,1),
+  descripcion VARCHAR(50) NOT NULL
+);
+ALTER TABLE FORMA_PAGO ADD CONSTRAINT PK_FORMA_PAGO PRIMARY KEY (id_forma_pago), CONSTRAINT UQ_FORMA_PAGO_DESCRIPCION UNIQUE (descripcion);
+
+CREATE TABLE VENTA (
+  id_venta INT NOT NULL IDENTITY (1,1),
+  fecha DATETIME NOT NULL,
+  total DECIMAL(12,2) NOT NULL,
+  id_cliente INT NOT NULL,
+  id_empleado INT NOT NULL,
+  id_forma_pago INT NOT NULL
+);
+ALTER TABLE VENTA ADD CONSTRAINT PK_VENTA PRIMARY KEY (id_venta), CONSTRAINT DF_VENTA_FECHA DEFAULT GETDATE() FOR fecha, CONSTRAINT CK_VENTA_TOTAL CHECK (total >= 0), CONSTRAINT FK_VENTA_CLIENTE FOREIGN KEY (id_cliente) REFERENCES CLIENTE(id_cliente) ON DELETE NO ACTION ON UPDATE CASCADE, CONSTRAINT FK_VENTA_EMPLEADO FOREIGN KEY (id_empleado) REFERENCES EMPLEADO(id_empleado) ON DELETE NO ACTION ON UPDATE CASCADE, CONSTRAINT FK_VENTA_FORMA_PAGO FOREIGN KEY (id_forma_pago) REFERENCES FORMA_PAGO(id_forma_pago) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+CREATE TABLE DETALLE_VENTA (
+  id_detalle INT NOT NULL IDENTITY (1,1),
+  cantidad INT NOT NULL,
+  precio_unitario DECIMAL(10,2) NOT NULL,
+  id_venta INT NOT NULL,
+  id_producto INT NOT NULL
+);
+ALTER TABLE DETALLE_VENTA ADD CONSTRAINT PK_DETALLE_VENTA PRIMARY KEY (id_detalle), CONSTRAINT UQ_DETALLE_VENTA_PRODUCTO UNIQUE (id_venta, id_producto), CONSTRAINT CK_DETALLE_CANTIDAD CHECK (cantidad > 0), CONSTRAINT CK_DETALLE_PRECIO CHECK (precio_unitario > 0), CONSTRAINT FK_DETALLE_VENTA FOREIGN KEY (id_venta) REFERENCES VENTA(id_venta) ON DELETE CASCADE ON UPDATE CASCADE, CONSTRAINT FK_DETALLE_PRODUCTO FOREIGN KEY (id_producto) REFERENCES PRODUCTO(id_producto) ON DELETE NO ACTION ON UPDATE CASCADE;
+GO
+
+-- -------------------------------------------------------------------
+-- 1. PREPARACIÓN DE DATOS PARA INSERCIÓN MASIVA
+-- -------------------------------------------------------------------
+-- Inserción de datos básicos necesarios para cumplir con las Foreign Keys de VENTA
+INSERT INTO CLIENTE (nombre, apellido, dni, email, telefono) 
+VALUES ('Juan', 'Perez', '12345678', 'juan@email.com', '1234567890');
+
+INSERT INTO EMPLEADO (nombre, apellido, legajo, telefono) 
+VALUES ('Ana', 'Gomez', 'EMP01', '0987654321');
+
+INSERT INTO FORMA_PAGO (descripcion) 
+VALUES ('Efectivo');
+GO
+
+-- -------------------------------------------------------------------
+-- 2. CARGA MASIVA (1 MILLÓN DE REGISTROS) EN LA TABLA VENTA
+-- -------------------------------------------------------------------
+PRINT 'Iniciando carga masiva de 1,000,000 de ventas...';
+GO
+SET NOCOUNT ON;
+
+-- Utilizamos un CTE en cascada (Tally Table) para generar 1 millón de filas rápidamente
+WITH
+  L0   AS (SELECT 1 AS c UNION ALL SELECT 1),               
+  L1   AS (SELECT 1 AS c FROM L0 A CROSS JOIN L0 B),        
+  L2   AS (SELECT 1 AS c FROM L1 A CROSS JOIN L1 B),        
+  L3   AS (SELECT 1 AS c FROM L2 A CROSS JOIN L2 B),        
+  L4   AS (SELECT 1 AS c FROM L3 A CROSS JOIN L3 B),        
+  L5   AS (SELECT 1 AS c FROM L4 A CROSS JOIN L4 B),        
+  Nums AS (SELECT ROW_NUMBER() OVER(ORDER BY (SELECT NULL)) AS n FROM L5)
+INSERT INTO VENTA (fecha, total, id_cliente, id_empleado, id_forma_pago)
+SELECT TOP (1000000)
+    DATEADD(minute, n, '2020-01-01'), -- Fechas incrementales espaciadas por minutos
+    CAST(RAND(CHECKSUM(NEWID())) * 1000 AS DECIMAL(12,2)),
+    1, 1, 1
+FROM Nums;
+GO
+SET NOCOUNT OFF;
+PRINT 'Carga masiva finalizada.';
+GO
+
+-- -------------------------------------------------------------------
+-- 3. CONSULTA SIN ÍNDICE ESPECÍFICO
+-- -------------------------------------------------------------------
+SET STATISTICS IO, TIME ON;
+GO
+-- Limpiamos caché de planes y datos para que la prueba no se beneficie de ejecuciones previas (solo entornos de prueba)
+DBCC FREEPROCCACHE; 
+DBCC DROPCLEANBUFFERS; 
+GO
+
+PRINT '--- PRUEBA 1: SIN ÍNDICE ESPECÍFICO EN FECHA (Table / Clustered Index Scan) ---';
+SELECT id_venta, fecha, total
+FROM VENTA
+WHERE fecha >= '2021-01-01' AND fecha <= '2021-12-31';
+GO
+SET STATISTICS IO, TIME OFF;
+GO
+
+-- -------------------------------------------------------------------
+-- 4. DEFINIR ÍNDICE AGRUPADO SOBRE FECHA Y REPETIR LA CONSULTA
+-- -------------------------------------------------------------------
+-- Aclaración Técnica: Por defecto en SQL Server, la Primary Key crea un índice CLUSTERED (agrupado).
+-- Para poder crear un índice CLUSTERED en 'fecha', primero debemos eliminar el índice
+-- clustered actual cambiando la PK a NONCLUSTERED.
+
+-- Borramos FK temporalmente
+ALTER TABLE DETALLE_VENTA DROP CONSTRAINT FK_DETALLE_VENTA;
+-- Cambiamos la PK a NONCLUSTERED
+ALTER TABLE VENTA DROP CONSTRAINT PK_VENTA;
+ALTER TABLE VENTA ADD CONSTRAINT PK_VENTA PRIMARY KEY NONCLUSTERED (id_venta);
+-- Recreamos FK
+ALTER TABLE DETALLE_VENTA ADD CONSTRAINT FK_DETALLE_VENTA FOREIGN KEY (id_venta) REFERENCES VENTA(id_venta) ON DELETE CASCADE ON UPDATE CASCADE;
+GO
+
+-- Creamos el Índice Agrupado en Fecha
+CREATE CLUSTERED INDEX CIX_VENTA_fecha ON VENTA(fecha);
+GO
+
+SET STATISTICS IO, TIME ON;
+GO
+DBCC FREEPROCCACHE;
+DBCC DROPCLEANBUFFERS;
+GO
+
+PRINT '--- PRUEBA 2: CON ÍNDICE AGRUPADO EN FECHA (Clustered Index Seek) ---';
+SELECT id_venta, fecha, total
+FROM VENTA
+WHERE fecha >= '2021-01-01' AND fecha <= '2021-12-31';
+GO
+SET STATISTICS IO, TIME OFF;
+GO
+
+DROP INDEX CIX_VENTA_fecha ON VENTA;
+GO
+
+CREATE NONCLUSTERED INDEX NCIX_VENTA_fecha_inc ON VENTA(fecha) INCLUDE (total);
+GO
+
+SET STATISTICS IO, TIME ON;
+GO
+DBCC FREEPROCCACHE;
+DBCC DROPCLEANBUFFERS;
+GO
+
+PRINT '--- PRUEBA 3: CON ÍNDICE NO AGRUPADO + INCLUDE (Index Seek - Covering Index) ---';
+SELECT id_venta, fecha, total
+FROM VENTA
+WHERE fecha >= '2021-01-01' AND fecha <= '2021-12-31';
+GO
+SET STATISTICS IO, TIME OFF;
+GO
