@@ -1,21 +1,14 @@
 USE techgamer;
 GO
 
--- ============================================================================
 -- ETAPA V - ÍNDICES (OPTIMIZACIÓN)
---
 -- Ya existen índices creados automáticamente por las restricciones:
---   * cada PRIMARY KEY crea un índice agrupado (clustered)
---   * cada UNIQUE crea un índice no agrupado (dni, legajo, cuil, nombre de
---     categoría, descripción de forma de pago, (id_venta, id_producto))
--- SQL Server NO crea índices automáticamente sobre las claves foráneas, por
--- eso se agregan abajo los que aceleran joins, filtros y la función de descuento.
--- ============================================================================
+-- * cada PRIMARY KEY crea un índice agrupado (clustered)
+-- * cada UNIQUE crea un índice no agrupado (dni, legajo, cuil, nombre de
+--   categoría, descripción de forma de pago, (id_venta, id_producto))
+-- SQL Server NO crea índices automáticamente sobre las claves foráneas, por eso se agregan abajo los que aceleran joins, filtros y la función de descuento.
 
--- ============================================================================
 -- 1. ÍNDICES NO AGRUPADOS
--- ============================================================================
-
 -- VENTA: cubre la consulta de fn_CalcularDescuentoCliente (SUM(total) por cliente)
 IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_VENTA_id_cliente' AND object_id = OBJECT_ID('dbo.VENTA'))
     DROP INDEX IX_VENTA_id_cliente ON dbo.VENTA;
@@ -30,7 +23,7 @@ CREATE NONCLUSTERED INDEX IX_VENTA_fecha
     ON dbo.VENTA (fecha)
     INCLUDE (total, id_cliente, id_empleado);
 
--- VENTA: ventas por empleado (clave foránea)
+-- VENTA: ventas por empleado (FK)
 IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_VENTA_id_empleado' AND object_id = OBJECT_ID('dbo.VENTA'))
     DROP INDEX IX_VENTA_id_empleado ON dbo.VENTA;
 CREATE NONCLUSTERED INDEX IX_VENTA_id_empleado
@@ -81,10 +74,7 @@ CREATE NONCLUSTERED INDEX IX_AUDITORIA_fecha
     ON dbo.AUDITORIA (fecha);
 GO
 
--- ============================================================================
--- 2. ÍNDICE FILTRADO: solo indexa los productos con stock bajo (<= 10)
--- Es más chico y rápido que un índice completo sobre stock.
--- ============================================================================
+-- 2. ÍNDICE FILTRADO
 IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_PRODUCTO_stock_bajo' AND object_id = OBJECT_ID('dbo.PRODUCTO'))
     DROP INDEX IX_PRODUCTO_stock_bajo ON dbo.PRODUCTO;
 CREATE NONCLUSTERED INDEX IX_PRODUCTO_stock_bajo
@@ -93,9 +83,7 @@ CREATE NONCLUSTERED INDEX IX_PRODUCTO_stock_bajo
     WHERE stock <= 10;
 GO
 
--- ============================================================================
--- 3. LISTADO DE ÍNDICES CREADOS
--- ============================================================================
+-- 3. LISTADO DE ÍNDICES
 SELECT OBJECT_NAME(i.object_id) AS tabla,
        i.name                   AS indice,
        i.type_desc              AS tipo,
@@ -107,14 +95,12 @@ WHERE i.object_id IN (SELECT object_id FROM sys.tables)
 ORDER BY tabla, i.type_desc, i.name;
 GO
 
--- ============================================================================
 -- 4. DEMOSTRACIÓN DEL IMPACTO
 -- Con solo 10 filas por tabla el motor siempre hace un recorrido completo, así
 -- que la mejora no se nota. Para medirla se crea una tabla de prueba con 200.000
 -- ventas, se consulta SIN índice y luego CON índice, y se comparan las lecturas
 -- lógicas (logical reads: páginas leídas, menos es mejor).
 -- La tabla de prueba se elimina al final y no afecta los datos reales.
--- ============================================================================
 IF OBJECT_ID('dbo.VENTA_PRUEBA', 'U') IS NOT NULL DROP TABLE dbo.VENTA_PRUEBA;
 GO
 
@@ -142,7 +128,7 @@ GO
 SET STATISTICS IO ON;
 SET STATISTICS TIME ON;
 
--- 4.1 SIN índice: recorre toda la tabla (Clustered Index Scan)
+-- 4.1 SIN índice: recorre toda la tabla
 PRINT '--- SIN INDICE ---';
 SELECT SUM(total) AS total_cliente
 FROM dbo.VENTA_PRUEBA
@@ -155,7 +141,7 @@ CREATE NONCLUSTERED INDEX IX_VENTA_PRUEBA_id_cliente
     INCLUDE (total, fecha);
 GO
 
--- 4.3 CON índice: busca directo al cliente (Index Seek)
+-- 4.3 CON índice: busca directo al cliente
 PRINT '--- CON INDICE ---';
 SELECT SUM(total) AS total_cliente
 FROM dbo.VENTA_PRUEBA
