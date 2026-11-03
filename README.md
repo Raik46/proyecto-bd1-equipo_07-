@@ -53,13 +53,21 @@ Una venta se vincula con un cliente, un empleado y una forma de pago. A su vez, 
 ### Relaciones principales
 
 | Relación | Cardinalidad |
+
 | CATEGORIA — PRODUCTO | Una categoría puede tener muchos productos. |
+
 | PROVEEDOR — PRODUCTO | Un proveedor puede suministrar muchos productos. |
+
 | CLIENTE — VENTA | Un cliente puede realizar muchas ventas. |
+
 | EMPLEADO — VENTA | Un empleado puede registrar muchas ventas. |
+
 | FORMA_PAGO — VENTA | Una forma de pago puede utilizarse en muchas ventas. |
+
 | VENTA — DETALLE_VENTA | Una venta puede contener varios detalles. |
+
 | PRODUCTO — DETALLE_VENTA | Un producto puede aparecer en muchos detalles de venta. |
+
 
 El modelo entidad-relación y los diagramas se encuentran en la carpeta `modelos/` y en la documentación de las etapas.
 
