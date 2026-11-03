@@ -7,12 +7,17 @@ TechGamer es un proyecto de diseño e implementación de una base de datos relac
 ---
 
 ## Integrantes del equipo
-|---:|---|---|
+
 | N.º | Apellido y nombre | DNI |
+
 | 1 | Roa Gabriel Alan      | [43346673] |
+
 | 2 | Gon Victoria Raquel   | [46776550] |
+
 | 3 | Miño Maidana Ulises Ivan | [45526629] |
+
 | 4 | Bonessi Luis Maria | [46773971] |
+
 | 5 | Aranda Gabriel Angel | [46714612] |
 
 ---
