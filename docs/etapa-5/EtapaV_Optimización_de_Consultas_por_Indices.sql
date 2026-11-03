@@ -85,9 +85,7 @@ CREATE TABLE DETALLE_VENTA (
 ALTER TABLE DETALLE_VENTA ADD CONSTRAINT PK_DETALLE_VENTA PRIMARY KEY (id_detalle), CONSTRAINT UQ_DETALLE_VENTA_PRODUCTO UNIQUE (id_venta, id_producto), CONSTRAINT CK_DETALLE_CANTIDAD CHECK (cantidad > 0), CONSTRAINT CK_DETALLE_PRECIO CHECK (precio_unitario > 0), CONSTRAINT FK_DETALLE_VENTA FOREIGN KEY (id_venta) REFERENCES VENTA(id_venta) ON DELETE CASCADE ON UPDATE CASCADE, CONSTRAINT FK_DETALLE_PRODUCTO FOREIGN KEY (id_producto) REFERENCES PRODUCTO(id_producto) ON DELETE NO ACTION ON UPDATE CASCADE;
 GO
 
--- -------------------------------------------------------------------
--- 1. PREPARACIÓN DE DATOS PARA INSERCIÓN MASIVA
--- -------------------------------------------------------------------
+
 -- Inserción de datos básicos necesarios para cumplir con las Foreign Keys de VENTA
 INSERT INTO CLIENTE (nombre, apellido, dni, email, telefono) 
 VALUES ('Juan', 'Perez', '12345678', 'juan@email.com', '1234567890');
@@ -99,9 +97,7 @@ INSERT INTO FORMA_PAGO (descripcion)
 VALUES ('Efectivo');
 GO
 
--- -------------------------------------------------------------------
--- 2. CARGA MASIVA (1 MILLÓN DE REGISTROS) EN LA TABLA VENTA
--- -------------------------------------------------------------------
+
 PRINT 'Iniciando carga masiva de 1,000,000 de ventas...';
 GO
 SET NOCOUNT ON;
@@ -126,9 +122,6 @@ SET NOCOUNT OFF;
 PRINT 'Carga masiva finalizada.';
 GO
 
--- -------------------------------------------------------------------
--- 3. CONSULTA SIN ÍNDICE ESPECÍFICO
--- -------------------------------------------------------------------
 SET STATISTICS IO, TIME ON;
 GO
 -- Limpiamos caché de planes y datos para que la prueba no se beneficie de ejecuciones previas (solo entornos de prueba)
@@ -143,13 +136,6 @@ WHERE fecha >= '2021-01-01' AND fecha <= '2021-12-31';
 GO
 SET STATISTICS IO, TIME OFF;
 GO
-
--- -------------------------------------------------------------------
--- 4. DEFINIR ÍNDICE AGRUPADO SOBRE FECHA Y REPETIR LA CONSULTA
--- -------------------------------------------------------------------
--- Aclaración Técnica: Por defecto en SQL Server, la Primary Key crea un índice CLUSTERED (agrupado).
--- Para poder crear un índice CLUSTERED en 'fecha', primero debemos eliminar el índice
--- clustered actual cambiando la PK a NONCLUSTERED.
 
 -- Borramos FK temporalmente
 ALTER TABLE DETALLE_VENTA DROP CONSTRAINT FK_DETALLE_VENTA;
