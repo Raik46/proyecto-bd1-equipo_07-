@@ -1,15 +1,9 @@
 USE techgamer;
 GO
-
--- ============================================================================
 -- ETAPA V - TRIGGERS DE AUDITORÍA
 -- Tablas auditadas: VENTA, DETALLE_VENTA, PRODUCTO
--- Requiere SQL Server 2016 o superior (FOR JSON).
--- ============================================================================
 
--- ============================================================================
--- 1. TABLA DE AUDITORÍA
--- ============================================================================
+-- 1. TABLA DE AUDITORIA
 IF OBJECT_ID('dbo.AUDITORIA', 'U') IS NOT NULL
     DROP TABLE dbo.AUDITORIA;
 GO
@@ -34,9 +28,7 @@ ALTER TABLE dbo.AUDITORIA
       CONSTRAINT CK_AUDITORIA_OPERACION CHECK (operacion IN ('INSERT','UPDATE','DELETE'));
 GO
 
--- ============================================================================
 -- 2. TRIGGER SOBRE VENTA
--- ============================================================================
 IF OBJECT_ID('dbo.trg_Auditoria_Venta', 'TR') IS NOT NULL
     DROP TRIGGER dbo.trg_Auditoria_Venta;
 GO
@@ -65,10 +57,8 @@ BEGIN
     FULL OUTER JOIN deleted d ON i.id_venta = d.id_venta;
 END;
 GO
-
--- ============================================================================
+    
 -- 3. TRIGGER SOBRE DETALLE_VENTA
--- ============================================================================
 IF OBJECT_ID('dbo.trg_Auditoria_DetalleVenta', 'TR') IS NOT NULL
     DROP TRIGGER dbo.trg_Auditoria_DetalleVenta;
 GO
@@ -98,9 +88,7 @@ BEGIN
 END;
 GO
 
--- ============================================================================
 -- 4. TRIGGER SOBRE PRODUCTO (altas, bajas y cambios de nombre/precio/stock)
--- ============================================================================
 IF OBJECT_ID('dbo.trg_Auditoria_Producto', 'TR') IS NOT NULL
     DROP TRIGGER dbo.trg_Auditoria_Producto;
 GO
@@ -135,9 +123,7 @@ BEGIN
 END;
 GO
 
--- ============================================================================
--- 5. PROTECCIÓN DE LA TABLA DE AUDITORÍA (solo lectura)
--- ============================================================================
+-- 5. PROTECCIÓN DE LA TABLA DE AUDITORÍA
 IF OBJECT_ID('dbo.trg_Proteger_Auditoria', 'TR') IS NOT NULL
     DROP TRIGGER dbo.trg_Proteger_Auditoria;
 GO
