@@ -1,9 +1,7 @@
 USE techgamer;
 GO
 
--- ============================================================================
--- 1. FUNCIÓN ALMACENADA: fn_CalcularDescuentoCliente
--- ============================================================================
+-- 1. FUNCION ALMACENADA: fn_CalcularDescuentoCliente
 IF OBJECT_ID('dbo.fn_CalcularDescuentoCliente', 'FN') IS NOT NULL
     DROP FUNCTION dbo.fn_CalcularDescuentoCliente;
 GO
@@ -32,9 +30,7 @@ BEGIN
 END;
 GO
 
--- ============================================================================
 -- 2. PROCEDIMIENTO ALMACENADO: sp_RegistrarVentaCompleta
--- ============================================================================
 IF OBJECT_ID('dbo.sp_RegistrarVentaCompleta', 'P') IS NOT NULL
     DROP PROCEDURE dbo.sp_RegistrarVentaCompleta;
 GO
@@ -55,9 +51,7 @@ BEGIN
     DECLARE @total_calculado DECIMAL(12,2);
     DECLARE @nuevo_id_venta INT;
 
-    -- ------------------------------------------------------------------------
     -- VALIDACIONES DE NEGOCIO
-    -- ------------------------------------------------------------------------
     IF @cantidad <= 0
     BEGIN
         RAISERROR('Error: La cantidad vendida debe ser mayor a 0.', 16, 1);
@@ -79,9 +73,7 @@ BEGIN
         RETURN;
     END
 
-    -- ------------------------------------------------------------------------
     -- OPERACIÓN MULTITABLA (TRANSACCIÓN INTEGRAL)
-    -- ------------------------------------------------------------------------
     BEGIN TRANSACTION;
     SET @descuento = dbo.fn_CalcularDescuentoCliente(@id_cliente);
     SET @total_calculado = (@precio_unitario * @cantidad) * (1.00 - @descuento);
