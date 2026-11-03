@@ -1,16 +1,11 @@
--- ============================================================================
+
 -- ETAPA V - SEGURIDAD (SQL Server)
 -- Autenticación (logins), autorización (usuarios, roles, GRANT/DENY) y
 -- protección de datos sensibles (Dynamic Data Masking).
---
 -- Ejecutar DESPUÉS de DDL, DML, EtapaV_Procedimientos_Funciones.sql y
 -- EtapaV_Triggers_Auditoria.sql.
--- IMPORTANTE: cambiar las contraseñas de ejemplo antes de usar en producción.
--- ============================================================================
 
--- ============================================================================
 -- 1. LOGINS (nivel servidor): quién puede conectarse al motor
--- ============================================================================
 USE master;
 GO
 
@@ -27,9 +22,7 @@ IF NOT EXISTS (SELECT 1 FROM sys.server_principals WHERE name = 'login_auditor')
         WITH PASSWORD = 'Aud#TechGamer2026!', CHECK_POLICY = ON, DEFAULT_DATABASE = techgamer;
 GO
 
--- ============================================================================
 -- 2. USUARIOS (nivel base de datos): qué login entra a techgamer
--- ============================================================================
 USE techgamer;
 GO
 
@@ -43,9 +36,7 @@ CREATE USER usr_gerente  FOR LOGIN login_gerente;
 CREATE USER usr_auditor  FOR LOGIN login_auditor;
 GO
 
--- ============================================================================
 -- 3. ROLES: grupos de permisos según la función (mínimo privilegio)
--- ============================================================================
 IF DATABASE_PRINCIPAL_ID('rol_vendedor') IS NOT NULL
 BEGIN
     IF IS_ROLEMEMBER('rol_vendedor', 'usr_vendedor') = 1 ALTER ROLE rol_vendedor DROP MEMBER usr_vendedor;
@@ -73,14 +64,12 @@ ALTER ROLE rol_gerente  ADD MEMBER usr_gerente;
 ALTER ROLE rol_auditor  ADD MEMBER usr_auditor;
 GO
 
--- ============================================================================
+    
 -- 4. PERMISOS
--- ============================================================================
-
--- ---- Vendedor: consulta catálogo y clientes; vende SOLO mediante el procedimiento
+-- Vendedor: consulta catalogo y clientes; vende SOLO mediante el procedimiento
 GRANT SELECT ON dbo.PRODUCTO    TO rol_vendedor;
 GRANT SELECT ON dbo.CATEGORIA   TO rol_vendedor;
-GRANT SELECT ON dbo.CLIENTE     TO rol_vendedor;   -- los datos sensibles salen enmascarados (sección 5)
+GRANT SELECT ON dbo.CLIENTE     TO rol_vendedor;   
 GRANT SELECT ON dbo.FORMA_PAGO  TO rol_vendedor;
 GRANT EXECUTE ON dbo.sp_RegistrarVentaCompleta TO rol_vendedor;
 GRANT EXECUTE ON dbo.fn_CalcularDescuentoCliente TO rol_vendedor;
@@ -92,7 +81,7 @@ DENY INSERT, UPDATE, DELETE ON dbo.PRODUCTO      TO rol_vendedor;
 DENY SELECT ON dbo.AUDITORIA TO rol_vendedor;
 DENY SELECT ON dbo.EMPLEADO  TO rol_vendedor;
 
--- ---- Gerente: lee todo y puede vender; no modifica la estructura
+-- Gerente: lee todo y puede vender; no modifica la estructura
 ALTER ROLE db_datareader ADD MEMBER usr_gerente;
 GRANT EXECUTE ON dbo.sp_RegistrarVentaCompleta TO rol_gerente;
 GRANT EXECUTE ON dbo.fn_CalcularDescuentoCliente TO rol_gerente;
@@ -105,19 +94,15 @@ DENY  SELECT ON dbo.CLIENTE   TO rol_auditor;
 DENY  INSERT, UPDATE, DELETE ON dbo.AUDITORIA TO rol_auditor;
 GO
 
--- ============================================================================
--- 5. ENMASCARAMIENTO DE DATOS SENSIBLES (Dynamic Data Masking)
+-- 5. ENMASCARAMIENTO DE DATOS SENSIBLES
 -- Los usuarios sin permiso UNMASK ven los datos ocultos parcialmente.
--- ============================================================================
 ALTER TABLE dbo.CLIENTE ALTER COLUMN dni      ADD MASKED WITH (FUNCTION = 'partial(0, "XXXX", 4)');
 ALTER TABLE dbo.CLIENTE ALTER COLUMN email    ADD MASKED WITH (FUNCTION = 'email()');
 ALTER TABLE dbo.CLIENTE ALTER COLUMN telefono ADD MASKED WITH (FUNCTION = 'partial(0, "XXX-XXX-", 4)');
 GO
 
--- ============================================================================
 -- 6. DEMOSTRACIÓN
 -- EXECUTE AS simula ser otro usuario; REVERT vuelve al usuario original.
--- ============================================================================
 
 -- 6.1 Vendedor: ve clientes con datos enmascarados
 EXECUTE AS USER = 'usr_vendedor';
