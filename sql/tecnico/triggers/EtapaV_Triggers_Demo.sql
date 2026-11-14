@@ -2,7 +2,7 @@ USE techgamer;
 GO
 
 -- ETAPA V - DEMOSTRACIÓN DE TRIGGERS DE AUDITORÍA
--- Ejecutar después de EtapaV_Procedimientos_Funciones.sql y
+-- Ejecutar después de EtapaV_Funciones.sql, EtapaV_Procedimientos.sql y
 -- EtapaV_Triggers_Auditoria.sql
 
 -- 1) Venta con el procedimiento (el cliente 5 ya acumuló $620.000: 10% de descuento)

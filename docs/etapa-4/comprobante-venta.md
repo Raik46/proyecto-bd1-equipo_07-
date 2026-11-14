@@ -74,4 +74,4 @@ La consulta actual muestra el detalle y el acumulado, pero no incluye la forma d
 
 ## 6. Archivo SQL relacionado
 
-La consulta se encuentra en la sección **Comprobante** de `sql/ETAPA4PRUEBA.SQL`.
+La consulta se encuentra en la sección **Comprobante** de `sql/consultas/datos_prueba.sql`.

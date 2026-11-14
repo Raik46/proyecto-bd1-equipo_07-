@@ -30,5 +30,5 @@ GO
 -- busqueda por apellido y nombre (indice compuesto)
 SELECT id_cliente, nombre, apellido
 FROM dbo.CLIENTE
-WHERE apellido = 'Perez';
+WHERE apellido = 'Fernandez';
 GO

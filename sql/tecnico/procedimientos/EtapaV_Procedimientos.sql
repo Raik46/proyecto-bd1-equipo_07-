@@ -14,6 +14,7 @@ CREATE PROCEDURE dbo.sp_RegistrarVentaCompleta
 AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON;
 
     DECLARE @precio_unitario DECIMAL(10,2);
     DECLARE @stock_actual INT;
@@ -23,45 +24,45 @@ BEGIN
 
     -- VALIDACIONES DE NEGOCIO
     IF @cantidad <= 0
-    BEGIN
-        RAISERROR('Error: La cantidad vendida debe ser mayor a 0.', 16, 1);
-        RETURN;
-    END
-
-    SELECT @precio_unitario = precio, @stock_actual = stock
-    FROM dbo.PRODUCTO
-    WHERE id_producto = @id_producto;
-
-    IF @precio_unitario IS NULL
-    BEGIN
-        RAISERROR('Error: El producto especificado no existe.', 16, 1);
-        RETURN;
-    END
-
-    IF @stock_actual < @cantidad
-    BEGIN
-        RAISERROR('Error: Stock insuficiente para realizar la venta.', 16, 1);
-        RETURN;
-    END
+        THROW 50001, 'Error: La cantidad vendida debe ser mayor a 0.', 1;
 
     -- OPERACIÓN MULTITABLA (TRANSACCIÓN INTEGRAL)
-    BEGIN TRANSACTION;
-    SET @descuento = dbo.fn_CalcularDescuentoCliente(@id_cliente);
-    SET @total_calculado = (@precio_unitario * @cantidad) * (1.00 - @descuento);
+    BEGIN TRY
+        BEGIN TRANSACTION;
 
-    INSERT INTO dbo.VENTA (fecha, total, id_cliente, id_empleado, id_forma_pago)
-    VALUES (GETDATE(), @total_calculado, @id_cliente, @id_empleado, @id_forma_pago);
+        SELECT @precio_unitario = precio, @stock_actual = stock
+        FROM dbo.PRODUCTO WITH (UPDLOCK, HOLDLOCK)
+        WHERE id_producto = @id_producto;
 
-    SET @nuevo_id_venta = SCOPE_IDENTITY();
+        IF @precio_unitario IS NULL
+            THROW 50002, 'Error: El producto especificado no existe.', 1;
 
-    INSERT INTO dbo.DETALLE_VENTA (cantidad, precio_unitario, id_venta, id_producto)
-    VALUES (@cantidad, @precio_unitario, @nuevo_id_venta, @id_producto);
+        IF @stock_actual < @cantidad
+            THROW 50003, 'Error: Stock insuficiente para realizar la venta.', 1;
 
-    UPDATE dbo.PRODUCTO
-    SET stock = stock - @cantidad
-    WHERE id_producto = @id_producto;
+        SET @descuento = dbo.fn_CalcularDescuentoCliente(@id_cliente);
+        SET @total_calculado = (@precio_unitario * @cantidad) * (1.00 - @descuento);
 
-    COMMIT TRANSACTION;
+        INSERT INTO dbo.VENTA (fecha, total, id_cliente, id_empleado, id_forma_pago)
+        VALUES (GETDATE(), @total_calculado, @id_cliente, @id_empleado, @id_forma_pago);
+
+        SET @nuevo_id_venta = SCOPE_IDENTITY();
+
+        INSERT INTO dbo.DETALLE_VENTA (cantidad, precio_unitario, id_venta, id_producto)
+        VALUES (@cantidad, @precio_unitario, @nuevo_id_venta, @id_producto);
+
+        UPDATE dbo.PRODUCTO
+        SET stock = stock - @cantidad
+        WHERE id_producto = @id_producto;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF XACT_STATE() <> 0
+            ROLLBACK TRANSACTION;
+
+        THROW;
+    END CATCH
 
     PRINT 'Venta registrada con éxito. ID Venta: ' + CAST(@nuevo_id_venta AS VARCHAR(10));
 END;

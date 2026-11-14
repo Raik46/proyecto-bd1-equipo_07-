@@ -1,4 +1,11 @@
-SUM(v.total) AS total_gastado
+USE techgamer;
+GO
+
+SELECT
+    c.id_cliente,
+    c.nombre + ' ' + c.apellido AS cliente,
+    COUNT(v.id_venta) AS cantidad_compras,
+    SUM(v.total) AS total_gastado
 FROM CLIENTE AS c
 INNER JOIN VENTA AS v ON v.id_cliente = c.id_cliente
 GROUP BY c.id_cliente, c.nombre, c.apellido
@@ -10,7 +17,7 @@ ORDER BY total_gastado DESC;
 GO
 
 /*====================================================================
-  CASO DE USO 6 - VENTAS AGRUPADAS POR FORMA DE PAGO
+  CASO DE USO 4 - VENTAS AGRUPADAS POR FORMA DE PAGO
   Objetivo: mostrar cantidad de ventas y monto total registrado en VENTA
   para cada forma de pago. Se excluyen formas de pago que no tengan ventas.
 ====================================================================*/
@@ -26,7 +33,7 @@ ORDER BY total_vendido DESC;
 GO
 
 /*====================================================================
-  CASO DE USO 7 - PRODUCTOS CON STOCK BAJO
+  CASO DE USO 5 - PRODUCTOS CON STOCK BAJO
   Objetivo: identificar productos con stock mayor que cero e inferior a 5.
 ====================================================================*/
 SELECT
@@ -42,7 +49,7 @@ ORDER BY p.stock ASC, p.nombre;
 GO
 
 /*====================================================================
-  CASO DE USO 8 - PRODUCTOS SIN VENTAS
+  CASO DE USO 6 - PRODUCTOS SIN VENTAS
   Objetivo: encontrar productos que no aparecen en DETALLE_VENTA.
   LEFT JOIN conserva los productos aunque no tengan detalles asociados.
 ====================================================================*/

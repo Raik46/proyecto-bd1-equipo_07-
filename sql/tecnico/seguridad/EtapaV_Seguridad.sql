@@ -2,7 +2,7 @@
 -- ETAPA V - SEGURIDAD (SQL Server)
 -- Autenticación (logins), autorización (usuarios, roles, GRANT/DENY) y
 -- protección de datos sensibles (Dynamic Data Masking).
--- Ejecutar DESPUÉS de DDL, DML, EtapaV_Procedimientos_Funciones.sql y
+-- Ejecutar DESPUÉS de DDL, DML, EtapaV_Funciones.sql, EtapaV_Procedimientos.sql y
 -- EtapaV_Triggers_Auditoria.sql.
 
 -- 1. LOGINS (nivel servidor)
@@ -96,9 +96,23 @@ GO
 
 -- 5. ENMASCARAMIENTO DE DATOS SENSIBLES
 -- Los usuarios sin permiso UNMASK ven los datos ocultos parcialmente.
+IF OBJECT_ID('dbo.CK_CLIENTE_DNI', 'C') IS NOT NULL
+    ALTER TABLE dbo.CLIENTE DROP CONSTRAINT CK_CLIENTE_DNI;
+IF OBJECT_ID('dbo.CK_CLIENTE_EMAIL', 'C') IS NOT NULL
+    ALTER TABLE dbo.CLIENTE DROP CONSTRAINT CK_CLIENTE_EMAIL;
+IF OBJECT_ID('dbo.UQ_CLIENTE_DNI', 'UQ') IS NOT NULL
+    ALTER TABLE dbo.CLIENTE DROP CONSTRAINT UQ_CLIENTE_DNI;
+GO
+
 ALTER TABLE dbo.CLIENTE ALTER COLUMN dni      ADD MASKED WITH (FUNCTION = 'partial(0, "XXXX", 4)');
 ALTER TABLE dbo.CLIENTE ALTER COLUMN email    ADD MASKED WITH (FUNCTION = 'email()');
 ALTER TABLE dbo.CLIENTE ALTER COLUMN telefono ADD MASKED WITH (FUNCTION = 'partial(0, "XXX-XXX-", 4)');
+GO
+
+ALTER TABLE dbo.CLIENTE
+  ADD CONSTRAINT UQ_CLIENTE_DNI UNIQUE (dni),
+      CONSTRAINT CK_CLIENTE_DNI CHECK (dni LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
+      CONSTRAINT CK_CLIENTE_EMAIL CHECK (email LIKE '%_@_%.__%');
 GO
 
 -- 6. DEMOSTRACIÓN
