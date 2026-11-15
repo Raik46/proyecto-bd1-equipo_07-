@@ -9,16 +9,12 @@ TechGamer es un proyecto de diseño e implementación de una base de datos relac
 ## Integrantes del equipo
 
 | N.º | Apellido y nombre | DNI |
-
-| 1 | Roa Gabriel Alan      | [43346673] |
-
-| 2 | Gon Victoria Raquel   | [46776550] |
-
-| 3 | Miño Maidana Ulises Ivan | [45526629] |
-
-| 4 | Bonessi Luis Maria | [46773971] |
-
-| 5 | Aranda Gabriel Angel | [46714612] |
+|---|---|---|
+| 1 | Aranda Gabriel Angel | [46714612] |
+| 2 | Bonessi Luis Maria | [46773971] |
+| 3 | Gon Victoria Raquel   | [46776550] |
+| 4 | Miño Maidana Ulises Ivan | [45526629] |
+| 5 | Roa Gabriel Alan      | [43346673] |
 
 ---
 
@@ -53,21 +49,14 @@ Una venta se vincula con un cliente, un empleado y una forma de pago. A su vez, 
 ### Relaciones principales
 
 | Relación | Cardinalidad |
-
+|---|---|
 | CATEGORIA — PRODUCTO | Una categoría puede tener muchos productos. |
-
 | PROVEEDOR — PRODUCTO | Un proveedor puede suministrar muchos productos. |
-
 | CLIENTE — VENTA | Un cliente puede realizar muchas ventas. |
-
 | EMPLEADO — VENTA | Un empleado puede registrar muchas ventas. |
-
 | FORMA_PAGO — VENTA | Una forma de pago puede utilizarse en muchas ventas. |
-
 | VENTA — DETALLE_VENTA | Una venta puede contener varios detalles. |
-
 | PRODUCTO — DETALLE_VENTA | Un producto puede aparecer en muchos detalles de venta. |
-
 
 El modelo entidad-relación y los diagramas se encuentran en la carpeta `modelos/` y en la documentación de las etapas.
 
@@ -79,31 +68,33 @@ proyecto-bd1-equipo_07/
 ├── modelos/
 │   ├── TechGamer(Conceptual).png
 │   ├── TechGamer(DER).png
-│   └── archivos de modelado ER
+│   └── archivos de modelado ER (.erdplus)
 ├── sql/
 │   ├── ddl/
 │   │   └── DDL_techgamer.sql
 │   ├── dml/
 │   │   └── DML_techgamer.sql
-│   └── ETAPA4PRUEBA.SQL
+│   ├── consultas/
+│   │   └── datos_puebra.sql
+│   └── tecnico/
+│       ├── funciones/        (EtapaV_Funciones.sql, EtapaV_Demo_Funciones.sql)
+│       ├── procedimientos/   (EtapaV_Procedimientos.sql, EtapaV_Demo_Procedimientos.sql)
+│       ├── transacciones/    (EtapaV_Transacciones_Implementacion.sql, EtapaV_Transacciones_Demostracion.sql)
+│       ├── triggers/         (EtapaV_Triggers_Auditoria.sql, EtapaV_Triggers_Auditoria_Alternativa.sql,
+│       │                      EtapaV_Triggers_Demo.sql, EtapaV_Triggers_Demo_Alternativa.sql)
+│       ├── indices/          (EtapaV_Indices.sql, EtapaV_Demo_Indices.sql)
+│       ├── Optimizacion/     (EtapaV_Optimización_de_Consultas_por_Indices.sql,
+│       │                      EtapaV_Demo_Optimización_de_Consultas_por_Indices.sql)
+│       └── seguridad/        (EtapaV_Seguridad.sql, EtapaV_Demo_Seguridad.sql)
 └── docs/
-    ├── etapa-01/
+    ├── etapa-1/
     ├── etapa-2/
     ├── etapa-3/
     ├── etapa-4/
     └── etapa-5/
-        ├── EtapaV_Procedimientos_Funciones.sql
-        ├── EtapaV_Transacciones_Implementacion.sql
-        ├── EtapaV_Transacciones_Demostracion.sql
-        ├── EtapaV_Triggers_Auditoria.sql
-        ├── EtapaV_Triggers_Auditoria_Alternativa.sql
-        ├── EtapaV_Triggers_Demo.sql
-        ├── EtapaV_Triggers_Demo_Alternativa.sql
-        ├── EtapaV_Indices.sql
-        └── EtapaV_Seguridad.sql
 ```
 
-La carpeta `docs/` contiene la documentación y los scripts de las distintas etapas. Los archivos alternativos de auditoría y demostración son variantes: no es necesario ejecutar ambas versiones.
+La carpeta `docs/` contiene la documentación de las distintas etapas y la carpeta `sql/` todos los scripts. Los archivos alternativos de auditoría y demostración son variantes: no es necesario ejecutar ambas versiones.
 
 ## 4. Instalación y puesta en marcha
 
@@ -119,16 +110,17 @@ Abrir los scripts en la herramienta de administración de SQL Server y ejecutarl
 
 1. `sql/ddl/DDL_techgamer.sql` — crea la base `techgamer` y sus tablas.
 2. `sql/dml/DML_techgamer.sql` — carga los datos iniciales de ejemplo.
-3. `docs/etapa-5/EtapaV_Procedimientos_Funciones.sql` — crea la función de descuentos y el procedimiento de venta simple.
-4. `docs/etapa-5/EtapaV_Transacciones_Implementacion.sql` — crea el tipo de tabla y el procedimiento para ventas con varios productos.
-5. **Una sola** variante de auditoría:
+3. `sql/tecnico/funciones/EtapaV_Funciones.sql` — crea la función de descuentos.
+4. `sql/tecnico/procedimientos/EtapaV_Procedimientos.sql` — crea el procedimiento de venta simple.
+5. `sql/tecnico/transacciones/EtapaV_Transacciones_Implementacion.sql` — crea el tipo de tabla y el procedimiento para ventas con varios productos.
+6. **Una sola** variante de auditoría (en `sql/tecnico/triggers/`):
    - `EtapaV_Triggers_Auditoria.sql`, o
    - `EtapaV_Triggers_Auditoria_Alternativa.sql`.
-6. `docs/etapa-5/EtapaV_Indices.sql` — crea índices y ejecuta una demostración de rendimiento.
-7. `docs/etapa-5/EtapaV_Seguridad.sql` — configura logins, usuarios, roles y enmascaramiento.
-8. Los scripts `EtapaV_Transacciones_Demostracion.sql` y `EtapaV_Triggers_Demo.sql` (o sus variantes) sirven para probar los comportamientos implementados.
+7. `sql/tecnico/indices/EtapaV_Indices.sql` — crea índices y ejecuta una demostración de rendimiento.
+8. `sql/tecnico/seguridad/EtapaV_Seguridad.sql` — configura logins, usuarios, roles y enmascaramiento.
+9. Los scripts de demostración (`EtapaV_Demo_*.sql`, `EtapaV_Transacciones_Demostracion.sql`, `EtapaV_Triggers_Demo.sql` o su variante alternativa, y los de `sql/tecnico/Optimizacion/`) sirven para probar los comportamientos implementados.
 
-Los archivos de demostración deben ejecutarse después de crear los objetos que utilizan. Las pruebas de etapas anteriores están documentadas en `docs/etapa-3/Pruebas_de_Validacion.md` y en los scripts de `docs/etapa-4/`.
+Los archivos de demostración deben ejecutarse después de crear los objetos que utilizan. Las pruebas de etapas anteriores están documentadas en `docs/etapa-3/pruebas_validacion.md` y en `sql/consultas/datos_puebra.sql` (documentado en `docs/etapa-4/`).
 
 
 ## 5. Funciones y lógica de negocio
@@ -184,7 +176,7 @@ La tabla `AUDITORIA` almacena la tabla afectada, el tipo de operación, el ident
 
 También se incorpora un trigger `INSTEAD OF UPDATE, DELETE` para impedir que se modifique o elimine directamente el historial de auditoría.
 
-En la variante alternativa, los cambios de `PRODUCTO` se registran cuando se modifica el nombre, el precio o el stock, evitando registrar actualizaciones sin cambios efectivos en esos campos.
+En ambas variantes, los cambios de `PRODUCTO` se registran solo cuando se modifica el nombre, el precio o el stock. La variante alternativa no elimina la tabla `AUDITORIA` si ya existe (conserva el historial), no incluye la columna `host` y compara los valores de forma segura frente a `NULL`.
 
 ## 8. Índices y optimización
 
@@ -269,7 +261,7 @@ El proyecto incluye pruebas para verificar tanto los datos como las reglas de ne
 - Intentos de insertar referencias inexistentes y valores fuera de los dominios permitidos.
 - Demostraciones de transacciones, auditoría y permisos.
 
-Los resultados esperados y varias consultas de validación están explicados en `docs/etapa-3/Pruebas_de_Validacion.md`. Las demostraciones de la etapa 5 se encuentran junto a sus respectivos scripts.
+Los resultados esperados y varias consultas de validación están explicados en `docs/etapa-3/pruebas_validacion.md`. Las demostraciones de la etapa 5 se encuentran junto a sus respectivos scripts.
 
 ## 13. Consideraciones técnicas
 

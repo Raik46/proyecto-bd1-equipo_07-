@@ -1,6 +1,6 @@
 # Procedimientos y funciones almacenadas
 
-Base de datos: `techgamer` (SQL Server). Script de prueba: `EtapaV_Demo_Procedimientos.sql`.
+Base de datos: `techgamer` (SQL Server). Scripts de prueba: `EtapaV_Demo_Funciones.sql` y `EtapaV_Demo_Procedimientos.sql`.
 
 ## Qué se hizo
 

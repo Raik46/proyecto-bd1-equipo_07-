@@ -2,7 +2,7 @@
 
 A continuación se detalla el esquema relacional derivado del script SQL de creación de la base de datos `techgamer`, incluyendo sus tablas, atributos, tipos de datos y restricciones.
 
-![Diagrama Entidad Relación (DER)](TechGamer(DER).jpg)
+![Diagrama del modelo relacional](der/TechGamer_Relacional.png)
 
 ---
 

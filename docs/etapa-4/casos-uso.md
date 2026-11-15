@@ -63,5 +63,4 @@ Estos escenarios muestran cómo una misma base de datos puede responder a necesi
 
 ## 5. Archivos SQL relacionados
 
-- `sql/ETAPA4PRUEBA.SQL`: contiene la consulta del comprobante, el informe por categoría y la consulta de clientes con gasto superior al promedio.
-- `docs/etapa-4/Casos-Prueba-SQL/Casos_de_Pruebas_EtapaIV_.sql`: contiene consultas adicionales para ventas por forma de pago, productos con stock bajo y productos sin ventas, además de pruebas controladas.
+- `sql/consultas/datos_pruebra.sql`: contiene las consultas de los seis casos (comprobante, informe por categoría, clientes con gasto superior al promedio, ventas por forma de pago, productos con stock bajo y productos sin ventas), además de pruebas controladas con `ROLLBACK`.

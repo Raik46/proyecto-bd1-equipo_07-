@@ -1,6 +1,6 @@
 # Seguridad
 
-Base de datos: `techgamer` (SQL Server). Scripts: `EtapaV_Seguridad.sql` (configuración) y `EtapaV_Seguridad_Demo.sql` (pruebas).
+Base de datos: `techgamer` (SQL Server). Scripts: `EtapaV_Seguridad.sql` (configuración) y `EtapaV_Demo_Seguridad.sql` (pruebas).
 
 ## Qué se hizo
 
@@ -46,7 +46,7 @@ Se aplicó sobre `CLIENTE`:
 | Columna | Función | Ejemplo de lo que ve el vendedor |
 |---|---|---|
 | `dni` | `partial(0, "XXXX", 4)` | `XXXX3456` |
-| `email` | `email()` | `jXXX@XXXX.com` |
+| `email` | `email()` | `lXXX@XXXX.com` |
 | `telefono` | `partial(0, "XXX-XXX-", 4)` | `XXX-XXX-1001` |
 
 Quien tiene `UNMASK` (el gerente) ve los valores reales. Los datos no se modifican en la tabla, solo cambia lo que devuelve la consulta.

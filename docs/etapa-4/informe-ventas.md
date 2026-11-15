@@ -75,4 +75,4 @@ El uso de `INNER JOIN` hace que no aparezcan categorías sin ventas en el perío
 
 ## 7. Archivo SQL relacionado
 
-La consulta se encuentra en la sección **Reporte** de `sql/ETAPA4PRUEBA.SQL`.
+La consulta se encuentra en `sql/consultas/datos_prueba.sql`, a continuación del comprobante de venta.

@@ -2,6 +2,42 @@ USE techgamer;
 GO
 
 SELECT
+    v.id_venta AS numero_venta,
+    v.fecha AS fecha_venta,
+    c.nombre + ' ' + c.apellido AS cliente,
+    e.nombre + ' ' + e.apellido AS empleado,
+    p.nombre AS producto,
+    dv.cantidad,
+    dv.precio_unitario,
+    dv.cantidad * dv.precio_unitario AS subtotal_renglon,
+    SUM(dv.cantidad * dv.precio_unitario) OVER (
+        PARTITION BY v.id_venta
+        ORDER BY dv.id_detalle
+    ) AS total_acumulado
+FROM VENTA AS v
+INNER JOIN CLIENTE AS c ON c.id_cliente = v.id_cliente
+INNER JOIN EMPLEADO AS e ON e.id_empleado = v.id_empleado
+INNER JOIN DETALLE_VENTA AS dv ON dv.id_venta = v.id_venta
+INNER JOIN PRODUCTO AS p ON p.id_producto = dv.id_producto
+WHERE v.id_venta = 1;
+GO
+
+SELECT
+    cat.id_categoria,
+    cat.nombre AS categoria,
+    SUM(dv.cantidad) AS unidades_vendidas,
+    SUM(dv.cantidad * dv.precio_unitario) AS monto_total_ventas
+FROM CATEGORIA AS cat
+INNER JOIN PRODUCTO AS p ON p.id_categoria = cat.id_categoria
+INNER JOIN DETALLE_VENTA AS dv ON dv.id_producto = p.id_producto
+INNER JOIN VENTA AS v ON v.id_venta = dv.id_venta
+WHERE v.fecha >= '2026-01-01T00:00:00'
+  AND v.fecha <= '2026-12-31T23:59:59'
+GROUP BY cat.id_categoria, cat.nombre
+ORDER BY monto_total_ventas DESC;
+GO
+
+SELECT
     c.id_cliente,
     c.nombre + ' ' + c.apellido AS cliente,
     COUNT(v.id_venta) AS cantidad_compras,
@@ -116,11 +152,11 @@ BEGIN TRY
     DECLARE @id_producto_normal_qa INT = CONVERT(INT, SCOPE_IDENTITY());
 
     INSERT INTO VENTA (fecha, total, id_cliente, id_empleado, id_forma_pago)
-    VALUES ('20261001T10:00:00', 10000.00, @id_cliente_qa, @id_empleado_qa, @id_pago_efectivo_qa);
+    VALUES ('2026-10-01T10:00:00', 10000.00, @id_cliente_qa, @id_empleado_qa, @id_pago_efectivo_qa);
     DECLARE @id_venta_efectivo_qa INT = CONVERT(INT, SCOPE_IDENTITY());
 
     INSERT INTO VENTA (fecha, total, id_cliente, id_empleado, id_forma_pago)
-    VALUES ('20261002T11:00:00', 30000.00, @id_cliente_qa, @id_empleado_qa, @id_pago_transferencia_qa);
+    VALUES ('2026-10-02T11:00:00', 30000.00, @id_cliente_qa, @id_empleado_qa, @id_pago_transferencia_qa);
     DECLARE @id_venta_transferencia_qa INT = CONVERT(INT, SCOPE_IDENTITY());
 
     INSERT INTO DETALLE_VENTA (cantidad, precio_unitario, id_venta, id_producto)

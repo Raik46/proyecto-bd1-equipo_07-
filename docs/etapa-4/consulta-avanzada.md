@@ -44,7 +44,7 @@ La condición `HAVING` compara el gasto acumulado de cada cliente con el promedi
 
 ```sql
 HAVING SUM(v.total) > (
-    SELECT AVG(total)
+    SELECT AVG(CAST(total AS DECIMAL(18, 2)))
     FROM VENTA
 )
 ```
@@ -82,4 +82,4 @@ El criterio puede adaptarse según las necesidades del comercio. Por ejemplo, se
 
 ## 8. Archivo SQL relacionado
 
-La consulta se encuentra en la sección **Consulta de Negocio** de `sql/ETAPA4PRUEBA.SQL`. Una versión de la consulta también aparece al comienzo de `docs/etapa-4/Casos-Prueba-SQL/Casos_de_Pruebas_EtapaIV_.sql`.
+La consulta se encuentra en `sql/consultas/datos_pruebaa.sql`, después del informe de ventas por categoría.

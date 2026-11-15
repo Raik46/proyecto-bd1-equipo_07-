@@ -1,6 +1,6 @@
 # Índices y optimización
 
-Base de datos: `techgamer` (SQL Server). Scripts: `EtapaV_Indices.sql` (creación), `EtapaV_Demo_Indices.sql` y `EtapaV_Demo_Optimizacion_Indices.sql` (pruebas).
+Base de datos: `techgamer` (SQL Server). Scripts: `EtapaV_Indices.sql` (creación, con una demostración de 200.000 filas), `EtapaV_Demo_Indices.sql` y `EtapaV_Demo_Optimización_de_Consultas_por_Indices.sql` (pruebas). `EtapaV_Optimización_de_Consultas_por_Indices.sql` compara además un índice agrupado en `fecha` contra un índice no agrupado con `INCLUDE` sobre 1.000.000 de filas.
 
 ## Índices que ya existían
 

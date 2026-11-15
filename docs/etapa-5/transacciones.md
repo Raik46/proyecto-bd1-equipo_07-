@@ -9,6 +9,7 @@ Registrar una venta toca tres cosas a la vez: la tabla `VENTA`, la tabla `DETALL
 ## Dónde se usa
 
 - **`sp_RegistrarVentaCompleta`**: la venta, el detalle y el descuento de stock se hacen como una sola unidad de trabajo.
+- **`sp_RegistrarVentaMultiple`**: registra una venta con varios productos recibidos en el tipo de tabla `dbo.TipoDetalleVenta`. Usa `TRY/CATCH`, `XACT_ABORT` y bloqueos `UPDLOCK, HOLDLOCK` sobre `PRODUCTO` (script `EtapaV_Transacciones_Implementacion.sql`). Se prueba con `EtapaV_Transacciones_Demostracion.sql`: venta correcta, falla a mitad de la venta con `ROLLBACK` automático, `ROLLBACK` manual, `SAVE TRANSACTION`, producto inexistente y detalle vacío.
 - **Scripts de demo**: las pruebas que no deben dejar datos se envuelven en `BEGIN TRANSACTION` / `ROLLBACK TRANSACTION`.
 
 ## Ejemplo de la demo
