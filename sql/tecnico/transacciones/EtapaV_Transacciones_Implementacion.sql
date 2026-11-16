@@ -80,7 +80,6 @@ BEGIN
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH
-
         IF XACT_STATE() <> 0
             ROLLBACK TRANSACTION;
 

@@ -1,4 +1,3 @@
-
 USE techgamer;
 GO
 

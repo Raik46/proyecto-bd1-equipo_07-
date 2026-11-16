@@ -1,12 +1,6 @@
 USE techgamer;
 GO
 
--- ETAPA V - ÍNDICES (OPTIMIZACIÓN)
--- Ya existen índices creados automáticamente por las restricciones:
--- * cada PRIMARY KEY crea un índice agrupado (clustered)
--- * cada UNIQUE crea un índice no agrupado (dni, legajo, cuil, nombre de
---   categoría, descripción de forma de pago, (id_venta, id_producto))
--- SQL Server NO crea índices automáticamente sobre las claves foráneas, por eso se agregan abajo los que aceleran joins, filtros y la función de descuento.
 
 -- 1. ÍNDICES NO AGRUPADOS
 -- VENTA: cubre la consulta de fn_CalcularDescuentoCliente (SUM(total) por cliente)
